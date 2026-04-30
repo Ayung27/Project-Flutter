@@ -221,7 +221,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 // 2. Tampilkan snackbar keberhasilan
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text("Pesanan berhasil dibuat! 🎉"),
+                    content: Text("Pesanan berhasil dibuat"),
                     backgroundColor: Color(0xFF4CAF50),
                     behavior: SnackBarBehavior.floating,
                   ),
@@ -240,7 +240,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 elevation: 0,
               ),
               child: const Text(
-                "Pesan Sekarang 🚀",
+                "Pesan Sekarang",
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,

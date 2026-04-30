@@ -1,158 +1,463 @@
+
+
+
+
 import 'package:flutter/material.dart';
 
-class LoginScreen extends StatelessWidget {
+import '../services/auth_service.dart';
+
+
+
+class LoginScreen extends StatefulWidget {
+
   const LoginScreen({super.key});
 
+
+
   @override
+
+  State<LoginScreen> createState() => _LoginScreenState();
+
+}
+
+
+
+class _LoginScreenState extends State<LoginScreen> {
+
+  final emailController = TextEditingController();
+
+  final passwordController = TextEditingController();
+
+  final AuthService auth = AuthService();
+
+  
+
+  bool _isLoading = false;
+
+
+
+  void _showSnackBar(String message) {
+
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+
+      SnackBar(content: Text(message), duration: const Duration(seconds: 2)),
+
+    );
+
+  }
+
+
+
+  // 🔐 LOGIN EMAIL & PASSWORD
+
+  void login() async {
+
+    String email = emailController.text.trim();
+
+    String password = passwordController.text;
+
+
+
+    if (email.isEmpty || password.isEmpty) {
+
+      _showSnackBar("Email dan Password harus diisi");
+
+      return;
+
+    }
+
+
+
+    setState(() => _isLoading = true);
+
+    var user = await auth.login(email, password);
+
+    setState(() => _isLoading = false);
+
+
+
+    if (user != null) {
+
+      if (!mounted) return;
+
+      Navigator.pushReplacementNamed(context, '/home');
+
+    } else {
+
+      _showSnackBar('Login gagal. Cek email/password Anda.');
+
+    }
+
+  }
+
+
+
+  // 🆕 REGISTER (VERSI SINKRON)
+
+  void register() async {
+
+    String email = emailController.text.trim();
+
+    String password = passwordController.text;
+
+
+
+    if (email.isEmpty || password.isEmpty) {
+
+      _showSnackBar("Isi email dan password untuk mendaftar");
+
+      return;
+
+    }
+
+
+
+    // CEK PASSWORD DULUAN BIAR SINKRON
+
+    if (password.length < 6) {
+
+      _showSnackBar("Gagal: Password minimal harus 6 karakter!");
+
+      return; 
+
+    }
+
+
+
+    if (!email.contains('@') || !email.endsWith('.com')) {
+
+      _showSnackBar("Format email salah! Gunakan @ dan .com");
+
+      return; 
+
+    }
+
+
+
+    setState(() => _isLoading = true);
+
+    try {
+
+      var user = await auth.register(email, password);
+
+      setState(() => _isLoading = false);
+
+
+
+      if (user != null) {
+
+        _showSnackBar('Register berhasil! Silakan klik tombol Login.');
+
+      } else {
+
+        _showSnackBar('Email sudah terdaftar. Silakan gunakan email lain.');
+
+      }
+
+    } catch (e) {
+
+      setState(() => _isLoading = false);
+
+      _showSnackBar('Terjadi kesalahan: $e');
+
+    }
+
+  }
+
+
+
+  // 🔵 LOGIN WITH GOOGLE
+
+  void loginGoogle() async {
+
+    setState(() => _isLoading = true);
+
+    var user = await auth.loginWithGoogle();
+
+    setState(() => _isLoading = false);
+
+
+
+    if (user != null) {
+
+      if (!mounted) return;
+
+      Navigator.pushReplacementNamed(context, '/home');
+
+    } else {
+
+      _showSnackBar('Login Google dibatalkan atau gagal');
+
+    }
+
+  }
+
+
+
+  @override
+
   Widget build(BuildContext context) {
+
     return Scaffold(
+
       backgroundColor: Colors.white,
+
       body: SafeArea(
+
         child: Padding(
+
           padding: const EdgeInsets.symmetric(horizontal: 24),
+
           child: Center(
+
             child: SingleChildScrollView(
+
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
+
                 children: [
-                  // 🔥 Logo / Title
-                  Icon(
-                    Icons.fastfood,
-                    size: 80,
-                    color: Colors.green,
+
+                  Image.asset(
+
+                    'assets/images/app_icon.png', // Sesuaikan dengan nama file logomu
+
+                    height: 120, // Kamu bisa atur ukurannya di sini
+
                   ),
+
                   const SizedBox(height: 16),
 
                   const Text(
+
                     "Food App",
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
+
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+
                   ),
 
                   const SizedBox(height: 32),
 
-                  // 📧 Email Field
+
+
                   TextField(
+
+                    controller: emailController,
+
+                    keyboardType: TextInputType.emailAddress,
+
                     decoration: InputDecoration(
+
                       hintText: "Email",
+
                       filled: true,
+
                       fillColor: Colors.grey[100],
-                      contentPadding: const EdgeInsets.symmetric(
-                        vertical: 16,
-                        horizontal: 16,
-                      ),
+
                       border: OutlineInputBorder(
+
                         borderRadius: BorderRadius.circular(12),
+
                         borderSide: BorderSide.none,
+
                       ),
+
                     ),
+
                   ),
 
                   const SizedBox(height: 16),
 
-                  // 🔒 Password Field
+
+
                   TextField(
+
+                    controller: passwordController,
+
                     obscureText: true,
+
                     decoration: InputDecoration(
+
                       hintText: "Password",
+
                       filled: true,
+
                       fillColor: Colors.grey[100],
-                      contentPadding: const EdgeInsets.symmetric(
-                        vertical: 16,
-                        horizontal: 16,
-                      ),
+
                       border: OutlineInputBorder(
+
                         borderRadius: BorderRadius.circular(12),
+
                         borderSide: BorderSide.none,
+
                       ),
+
                     ),
+
                   ),
 
                   const SizedBox(height: 24),
 
-                  // 🔘 Login Button
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.pushReplacementNamed(context, '/home');
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+
+
+                  if (_isLoading)
+
+                    const CircularProgressIndicator(color: Colors.green)
+
+                  else ...[
+
+                    SizedBox(
+
+                      width: double.infinity,
+
+                      child: ElevatedButton(
+
+                        onPressed: login,
+
+                        style: ElevatedButton.styleFrom(
+
+                          backgroundColor: Colors.green,
+
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+
                         ),
+
+                        child: const Text("Login", style: TextStyle(fontSize: 16, color: Colors.white)),
+
                       ),
-                      child: const Text(
-                        "Login",
-                        style: TextStyle(fontSize: 16),
-                      ),
+
                     ),
-                  ),
 
-                  const SizedBox(height: 16),
+                    const SizedBox(height: 12),
 
-                  // OR Divider
+
+
+                    SizedBox(
+
+                      width: double.infinity,
+
+                      child: OutlinedButton(
+
+                        onPressed: register,
+
+                        style: OutlinedButton.styleFrom(
+
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+
+                          side: const BorderSide(color: Colors.green),
+
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+
+                        ),
+
+                        child: const Text("Register", style: TextStyle(fontSize: 16, color: Colors.green)),
+
+                      ),
+
+                    ),
+
+                  ],
+
+
+
+                  const SizedBox(height: 20),
+
                   Row(
+
                     children: [
-                      Expanded(child: Divider()),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        child: Text("OR"),
+
+                      Expanded(child: Divider(color: Colors.grey[300])),
+
+                      const Padding(
+
+                        padding: EdgeInsets.symmetric(horizontal: 10),
+
+                        child: Text("ATAU", style: TextStyle(color: Colors.grey)),
+
                       ),
-                      Expanded(child: Divider()),
+
+                      Expanded(child: Divider(color: Colors.grey[300])),
+
                     ],
-                  ),
 
-                  const SizedBox(height: 16),
-
-                  // 🔵 Google Login
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                        Navigator.pushReplacementNamed(context, '/home');
-                      },
-                      icon: Icon(Icons.login, color: Colors.black),
-                      label: const Text(
-                        "Login with Google",
-                        style: TextStyle(color: Colors.black),
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        side: BorderSide(color: Colors.grey.shade300),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                    ),
                   ),
 
                   const SizedBox(height: 20),
 
-                  // 🔗 Register Text
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      Text("Don't have an account? "),
-                      Text(
-                        "Sign Up",
-                        style: TextStyle(
-                          color: Colors.green,
-                          fontWeight: FontWeight.bold,
-                        ),
+                  SizedBox(
+
+                    width: double.infinity,
+
+                    child: OutlinedButton(
+
+                      onPressed: _isLoading ? null : loginGoogle,
+
+                      style: OutlinedButton.styleFrom(
+
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+
+                        backgroundColor: Colors.white,
+
+                        side: BorderSide(color: Colors.grey.shade300),
+
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+
                       ),
-                    ],
+
+                      child: Row(
+
+                        mainAxisAlignment: MainAxisAlignment.center,
+
+                        children: [
+
+                          Image.asset(
+
+                            'assets/images/google_logo.png',
+
+                            height: 24,
+
+                            width: 24,
+
+                            errorBuilder: (context, error, stackTrace) => const Icon(Icons.account_circle, color: Colors.blue),
+
+                          ),
+
+                          const SizedBox(width: 12),
+
+                          const Text(
+
+                            "Login with Google",
+
+                            style: TextStyle(color: Colors.black, fontWeight: FontWeight.w500),
+
+                          ),
+
+                        ],
+
+                      ),
+
+                    ),
+
                   ),
+
+                  const SizedBox(height: 24),
+
                 ],
+
               ),
+
             ),
+
           ),
+
         ),
+
       ),
+
     );
+
   }
+
 }
