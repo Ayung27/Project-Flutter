@@ -38,12 +38,12 @@ class AlamatScreen extends StatelessWidget {
                     leading: CircleAvatar(
                       backgroundColor: Colors.green.shade50,
                       child: Icon(
-                        item['icon'] == 'home' ? Icons.home : (item['icon'] == 'school' ? Icons.school : Icons.location_on),
+                        item.icon == 'home' ? Icons.home : (item.icon == 'school' ? Icons.school : Icons.location_on),
                         color: const Color(0xFF4CAF50),
                       ),
                     ),
-                    title: Text(item['label']!, style: const TextStyle(fontWeight: FontWeight.bold)),
-                    subtitle: Text(item['detail']!),
+                    title: Text(item.label, style: const TextStyle(fontWeight: FontWeight.bold)),
+                    subtitle: Text(item.detail),
                     // IKON HAPUS
                     trailing: IconButton(
                       icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
@@ -68,7 +68,7 @@ class AlamatScreen extends StatelessWidget {
                         );
                       },
                     ),
-                    onTap: () => Navigator.pop(context, item['detail']),
+                    onTap: () => Navigator.pop(context, item.detail),
                   ),
                 );
               },

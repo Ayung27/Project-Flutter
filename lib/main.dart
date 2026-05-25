@@ -3,9 +3,13 @@ import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:food_app/services/storage_service.dart';
+import 'package:food_app/theme/app_theme.dart';
 
 // Import Screens
 import 'package:food_app/screens/login_screen.dart';
+import 'package:food_app/screens/register_screen.dart';
 import 'package:food_app/screens/home_screen.dart';
 import 'package:food_app/screens/cart_screen.dart';
 import 'package:food_app/screens/checkout_screen.dart';
@@ -19,6 +23,7 @@ import 'package:food_app/screens/order_history_screen.dart';
 // Import Providers
 import 'package:food_app/providers/cart_providers.dart';
 import 'package:food_app/providers/alamat_provider.dart';
+import 'package:food_app/providers/favorites_provider.dart';
 
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
@@ -28,11 +33,17 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
+  // Inisialisasi persistensi lokal sebelum runApp agar data langsung tersedia
+  // saat provider dibuat (loading sinkron, tanpa flicker/null).
+  final prefs = await SharedPreferences.getInstance();
+  final storage = StorageService(prefs);
+
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => CartProvider()),
-        ChangeNotifierProvider(create: (_) => AlamatProvider()),
+        ChangeNotifierProvider(create: (_) => CartProvider(storage: storage)..load()),
+        ChangeNotifierProvider(create: (_) => AlamatProvider(storage: storage)..load()),
+        ChangeNotifierProvider(create: (_) => FavoritesProvider(storage: storage)..load()),
       ],
       child: const MyApp(),
     ),
@@ -63,14 +74,12 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Food App',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF43A047)),
-        useMaterial3: true,
-      ),
+      theme: AppTheme.light,
       initialRoute: '/login',
       routes: {
         '/': (context) => LoginScreen(), // const dihapus
         '/login': (context) => LoginScreen(), // const dihapus
+        '/register': (context) => const RegisterScreen(),
         '/home': (context) => HomeScreen(), // const dihapus
         '/cart': (context) => const CartScreen(),
         '/checkout': (context) => const CheckoutScreen(),

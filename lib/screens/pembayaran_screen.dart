@@ -28,9 +28,22 @@ class _PembayaranScreenState extends State<PembayaranScreen> {
       ),
       body: Column(
         children: [
-          _buildPaymentOption("COD", "Bayar di Tempat", Icons.money),
-          _buildPaymentOption("Transfer Bank", "Transfer via ATM/Mobile Banking", Icons.account_balance),
-          _buildPaymentOption("E-Wallet", "OVO, Dana, GoPay", Icons.account_balance_wallet),
+          RadioGroup<String>(
+            groupValue: selectedMethod,
+            onChanged: (val) {
+              setState(() {
+                selectedMethod = val ?? selectedMethod;
+              });
+            },
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildPaymentOption("COD", "Bayar di Tempat", Icons.money),
+                _buildPaymentOption("Transfer Bank", "Transfer via ATM/Mobile Banking", Icons.account_balance),
+                _buildPaymentOption("E-Wallet", "OVO, Dana, GoPay", Icons.account_balance_wallet),
+              ],
+            ),
+          ),
           const Spacer(),
           Padding(
             padding: const EdgeInsets.all(20.0),
@@ -53,17 +66,11 @@ class _PembayaranScreenState extends State<PembayaranScreen> {
   }
 
   Widget _buildPaymentOption(String value, String desc, IconData icon) {
-    return RadioListTile(
+    return RadioListTile<String>(
       value: value,
-      groupValue: selectedMethod,
       title: Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
       subtitle: Text(desc),
       secondary: Icon(icon, color: Colors.green),
-      onChanged: (val) {
-        setState(() {
-          selectedMethod = val.toString();
-        });
-      },
     );
   }
 }

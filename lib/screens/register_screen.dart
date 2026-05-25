@@ -7,26 +7,32 @@ import '../widgets/auth_text_field.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _RegisterScreenState extends State<RegisterScreen> {
+  final nameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  final confirmController = TextEditingController();
   final AuthService auth = AuthService();
 
   bool _isLoading = false;
+  String? _nameError;
   String? _emailError;
   String? _passwordError;
+  String? _confirmError;
 
   @override
   void dispose() {
+    nameController.dispose();
     emailController.dispose();
     passwordController.dispose();
+    confirmController.dispose();
     super.dispose();
   }
 
@@ -35,41 +41,33 @@ class _LoginScreenState extends State<LoginScreen> {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
 
-  // 🔐 LOGIN EMAIL & PASSWORD
-  void login() async {
+  void register() async {
+    final name = nameController.text.trim();
     final email = emailController.text.trim();
     final password = passwordController.text;
+    final confirm = confirmController.text;
 
     setState(() {
+      _nameError = name.isEmpty ? 'Nama harus diisi' : null;
       _emailError = emailError(email);
-      // Login tidak memaksa panjang minimum (password akun bisa lama).
-      _passwordError = password.isEmpty ? 'Password harus diisi' : null;
+      _passwordError = passwordError(password);
+      _confirmError = password != confirm ? 'Konfirmasi password tidak cocok' : null;
     });
-    if (_emailError != null || _passwordError != null) return;
 
-    setState(() => _isLoading = true);
-    final user = await auth.login(email, password);
-    if (!mounted) return;
-    setState(() => _isLoading = false);
-
-    if (user != null) {
-      Navigator.pushReplacementNamed(context, '/home');
-    } else {
-      _showSnackBar('Login gagal. Cek email/password Anda.');
+    if (_nameError != null || _emailError != null || _passwordError != null || _confirmError != null) {
+      return;
     }
-  }
 
-  // 🔵 LOGIN WITH GOOGLE (logic tidak diubah)
-  void loginGoogle() async {
     setState(() => _isLoading = true);
-    final user = await auth.loginWithGoogle();
+    final user = await auth.register(email, password, name: name);
     if (!mounted) return;
     setState(() => _isLoading = false);
 
     if (user != null) {
-      Navigator.pushReplacementNamed(context, '/home');
+      _showSnackBar("Register berhasil! Silakan login.");
+      Navigator.pop(context);
     } else {
-      _showSnackBar('Login Google dibatalkan atau gagal');
+      _showSnackBar("Email sudah terdaftar atau registrasi gagal.");
     }
   }
 
@@ -77,11 +75,13 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
+      appBar: AppBar(backgroundColor: AppColors.background, elevation: 0),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.md),
             child: ConstrainedBox(
+              // Batasi lebar di web/desktop agar tidak melebar.
               constraints: const BoxConstraints(maxWidth: 420),
               child: TweenAnimationBuilder<double>(
                 tween: Tween(begin: 0, end: 1),
@@ -104,6 +104,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        // Header premium
         Container(
           width: 72,
           height: 72,
@@ -112,16 +113,27 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         const SizedBox(height: AppSpacing.lg),
         const Text(
-          "Selamat Datang 👋",
+          "Buat Akun Baru",
           style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
         ),
         const SizedBox(height: AppSpacing.xs),
         const Text(
-          "Masuk untuk mulai memesan makanan favoritmu",
+          "Daftar untuk mulai memesan makanan favoritmu",
           style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
         ),
         const SizedBox(height: AppSpacing.xl),
 
+        AuthTextField(
+          controller: nameController,
+          label: "Nama Lengkap",
+          icon: Icons.person_outline,
+          errorText: _nameError,
+          onChanged: (_) {
+            if (_nameError != null) setState(() => _nameError = null);
+          },
+          onSubmitted: (_) => FocusScope.of(context).nextFocus(),
+        ),
+        const SizedBox(height: AppSpacing.md),
         AuthTextField(
           controller: emailController,
           label: "Email",
@@ -139,64 +151,42 @@ class _LoginScreenState extends State<LoginScreen> {
           label: "Password",
           icon: Icons.lock_outline,
           isPassword: true,
-          textInputAction: TextInputAction.done,
           errorText: _passwordError,
           onChanged: (_) {
             if (_passwordError != null) setState(() => _passwordError = null);
           },
-          onSubmitted: (_) => login(),
+          onSubmitted: (_) => FocusScope.of(context).nextFocus(),
+        ),
+        const SizedBox(height: AppSpacing.md),
+        AuthTextField(
+          controller: confirmController,
+          label: "Konfirmasi Password",
+          icon: Icons.lock_outline,
+          isPassword: true,
+          textInputAction: TextInputAction.done,
+          errorText: _confirmError,
+          onChanged: (_) {
+            if (_confirmError != null) setState(() => _confirmError = null);
+          },
+          onSubmitted: (_) => register(),
         ),
         const SizedBox(height: AppSpacing.xl),
 
-        PrimaryButton(label: "Masuk", onPressed: login, loading: _isLoading),
+        PrimaryButton(label: "Daftar", onPressed: register, loading: _isLoading),
         const SizedBox(height: AppSpacing.md),
 
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text("Belum punya akun? ", style: TextStyle(color: AppColors.textSecondary)),
+            const Text("Sudah punya akun? ", style: TextStyle(color: AppColors.textSecondary)),
             GestureDetector(
-              onTap: () => Navigator.pushNamed(context, '/register'),
+              onTap: () => Navigator.pop(context),
               child: const Text(
-                "Daftar",
+                "Masuk",
                 style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
               ),
             ),
           ],
-        ),
-
-        const SizedBox(height: AppSpacing.lg),
-        Row(
-          children: [
-            Expanded(child: Divider(color: AppColors.border)),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
-              child: Text("ATAU", style: TextStyle(color: AppColors.textSecondary)),
-            ),
-            Expanded(child: Divider(color: AppColors.border)),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.lg),
-
-        // Google sign-in — logika tidak diubah, hanya layout disamakan.
-        OutlinedButton.icon(
-          onPressed: _isLoading ? null : loginGoogle,
-          icon: Image.asset(
-            'assets/images/google_logo.png',
-            height: 22,
-            width: 22,
-            errorBuilder: (_, _, _) =>
-                const Icon(Icons.account_circle, color: Colors.blue, size: 22),
-          ),
-          label: const Text(
-            "Login with Google",
-            style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w500),
-          ),
-          style: OutlinedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            side: BorderSide(color: AppColors.border),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
-          ),
         ),
       ],
     );
