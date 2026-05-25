@@ -104,12 +104,28 @@ class _LoginScreenState extends State<LoginScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Container(
-          width: 72,
-          height: 72,
-          decoration: const BoxDecoration(color: AppColors.primarySoft, shape: BoxShape.circle),
-          child: const Icon(Icons.restaurant_menu, color: AppColors.primary, size: 36),
+        // --- GANTI BAGIAN LOGO INI ---
+        Center(
+          child: Container(
+            width: 100, // Ukuran lingkaran dinaikkan sedikit agar logo barumu jelas
+            height: 100,
+            decoration: const BoxDecoration(
+              color: AppColors.primarySoft, 
+              shape: BoxShape.circle,
+            ),
+            padding: const EdgeInsets.all(12), // Jarak spasi di dalam lingkaran agar logo tidak mentok ke pinggir
+            child: Image.asset(
+              'assets/images/app_icon.png', 
+              fit: BoxFit.contain,
+              errorBuilder: (context, error, stackTrace) => const Icon(
+                Icons.restaurant_menu, // Pengaman jika nama file salah, akan kembali ke ikon sendok-garpu
+                color: AppColors.primary, 
+                size: 40,
+              ),
+            ),
+          ),
         ),
+        // ------------------------------
         const SizedBox(height: AppSpacing.lg),
         const Text(
           "Selamat Datang 👋",
