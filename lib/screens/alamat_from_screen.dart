@@ -98,7 +98,7 @@ class _AlamatFormScreenState extends State<AlamatFormScreen> {
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text("Isi semua data dulu ya, Bahrul! 😊"),
+                        content: Text("Lengkapi nama tempat & alamat dulu ya 😊"),
                         behavior: SnackBarBehavior.floating,
                       ),
                     );

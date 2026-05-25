@@ -79,6 +79,20 @@ class CartProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  /// Menambah [product] sebanyak [quantity] (merge bila sudah ada di cart).
+  /// Dipakai oleh fitur reorder. Satu notifyListeners untuk seluruh quantity.
+  void addQuantity(Product product, int quantity) {
+    if (quantity <= 0) return;
+    final index = _items.indexWhere((item) => item.product.name == product.name);
+    if (index >= 0) {
+      _items[index].quantity += quantity;
+    } else {
+      _items.add(CartItem(product: product, quantity: quantity));
+    }
+    _persistCart();
+    notifyListeners();
+  }
+
   void updateQuantity(int index, bool isAdd) {
     if (isAdd) {
       _items[index].quantity++;
@@ -104,7 +118,7 @@ class CartProvider with ChangeNotifier {
   int get totalBayar => _items.fold(0, (total, item) => total + item.subtotal);
 
   // Memindahkan keranjang ke riwayat pesanan, lalu mengosongkan keranjang.
-  void addOrder(int totalHarga) {
+  void addOrder(int totalHarga, {String notes = ''}) {
     if (_items.isNotEmpty) {
       _orders.insert(
         0,
@@ -113,6 +127,7 @@ class CartProvider with ChangeNotifier {
           date: DateTime.now(),
           items: List<CartItem>.from(_items), // Copy data keranjang
           total: totalHarga,
+          notes: notes,
         ),
       );
       _items.clear();

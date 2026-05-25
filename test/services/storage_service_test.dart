@@ -38,4 +38,13 @@ void main() {
     expect(storage.containsKey('alamat'), isTrue);
     expect(storage.readJsonList('alamat'), isEmpty);
   });
+
+  test('readStringList kosong bila key belum ada', () {
+    expect(storage.readStringList('favorites'), isEmpty);
+  });
+
+  test('writeStringList lalu readStringList round-trip', () async {
+    await storage.writeStringList('favorites', ['Nasi Goreng', 'Kopi Susu']);
+    expect(storage.readStringList('favorites'), ['Nasi Goreng', 'Kopi Susu']);
+  });
 }

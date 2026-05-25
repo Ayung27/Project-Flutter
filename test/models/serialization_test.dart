@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:food_app/models/product.dart';
 import 'package:food_app/models/cart_item.dart';
 import 'package:food_app/models/order.dart';
+import 'package:food_app/models/order_status.dart';
 import 'package:food_app/models/alamat.dart';
 
 void main() {
@@ -30,6 +31,16 @@ void main() {
     test('round-trip mempertahankan available=false', () {
       const product = Product(name: 'Habis', price: 1000, available: false);
       expect(Product.fromJson(product.toJson()).available, isFalse);
+    });
+
+    test('category default kosong bila tidak ada di JSON (backward-compat)', () {
+      final restored = Product.fromJson({'name': 'Lama', 'price': 1000});
+      expect(restored.category, '');
+    });
+
+    test('round-trip mempertahankan category', () {
+      const product = Product(name: 'Kopi Susu', price: 18000, category: 'Kopi');
+      expect(Product.fromJson(product.toJson()).category, 'Kopi');
     });
   });
 
@@ -66,6 +77,53 @@ void main() {
       expect(restored.total, 40000);
       expect(restored.items.single.product.name, 'Ayam');
       expect(restored.items.single.quantity, 2);
+    });
+
+    test('order baru default berstatus diproses', () {
+      final order = Order(id: 'x', date: DateTime(2026), items: const [], total: 0);
+      expect(order.status, OrderStatus.diproses);
+    });
+
+    test('round-trip mempertahankan status', () {
+      final order = Order(
+        id: 'x',
+        date: DateTime(2026),
+        items: const [],
+        total: 0,
+        status: OrderStatus.dikirim,
+      );
+      expect(Order.fromJson(order.toJson()).status, OrderStatus.dikirim);
+    });
+
+    test('data lama tanpa status fallback ke selesai (backward-compat)', () {
+      final legacy = {
+        'id': 'OLD',
+        'date': '2026-01-01T00:00:00.000',
+        'items': <dynamic>[],
+        'total': 1000,
+      };
+      expect(Order.fromJson(legacy).status, OrderStatus.selesai);
+    });
+
+    test('notes default kosong bila tidak ada di JSON (backward-compat)', () {
+      final legacy = {
+        'id': 'OLD',
+        'date': '2026-01-01T00:00:00.000',
+        'items': <dynamic>[],
+        'total': 1000,
+      };
+      expect(Order.fromJson(legacy).notes, '');
+    });
+
+    test('round-trip mempertahankan notes', () {
+      final order = Order(
+        id: 'x',
+        date: DateTime(2026),
+        items: const [],
+        total: 0,
+        notes: 'jangan pedas, saus dipisah',
+      );
+      expect(Order.fromJson(order.toJson()).notes, 'jangan pedas, saus dipisah');
     });
   });
 

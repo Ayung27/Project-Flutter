@@ -19,8 +19,10 @@ void main() {
   }
 
   Future<void> applyCode(WidgetTester tester, String code) async {
-    await tester.ensureVisible(find.byType(TextField));
-    await tester.enterText(find.byType(TextField), code);
+    // Field voucher adalah TextField pertama (sebelum field "Catatan").
+    final voucherField = find.byType(TextField).first;
+    await tester.ensureVisible(voucherField);
+    await tester.enterText(voucherField, code);
     await tester.ensureVisible(find.widgetWithText(ElevatedButton, 'Pakai'));
     await tester.tap(find.widgetWithText(ElevatedButton, 'Pakai'));
     await tester.pump(); // proses notifyListeners + tampilkan snackbar

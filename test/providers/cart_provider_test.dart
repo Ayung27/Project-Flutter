@@ -56,6 +56,14 @@ void main() {
       expect(cart.items.length, 1);
       expect(cart.items.first.product.name, 'Ayam Geprek Matah');
     });
+
+    test('addQuantity menambah sejumlah quantity dan merge bila sudah ada', () {
+      cart.addQuantity(nasi, 3);
+      expect(cart.items.single.quantity, 3);
+
+      cart.addQuantity(nasi, 2);
+      expect(cart.items.single.quantity, 5);
+    });
   });
 
   group('persistence', () {

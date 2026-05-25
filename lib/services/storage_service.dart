@@ -28,4 +28,10 @@ class StorageService {
 
   /// True bila [key] pernah ditulis (termasuk bila isinya list kosong).
   bool containsKey(String key) => _prefs.containsKey(key);
+
+  /// Daftar string sederhana (mis. ID favorit). Kosong bila belum ada.
+  List<String> readStringList(String key) => _prefs.getStringList(key) ?? const [];
+
+  Future<void> writeStringList(String key, List<String> value) =>
+      _prefs.setStringList(key, value);
 }

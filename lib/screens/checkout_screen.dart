@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/cart_providers.dart';
 import '../utils/currency.dart';
+import '../widgets/section_title.dart';
+import '../widgets/primary_button.dart';
+import '../theme/app_colors.dart';
+import '../theme/app_spacing.dart';
 import 'pembayaran_screen.dart';
 
 class CheckoutScreen extends StatefulWidget {
@@ -15,10 +19,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   String metodePembayaran = "COD";
   String alamatSaatIni = "Jl. Contoh No.123, Serang, Banten";
   final voucherController = TextEditingController();
+  final notesController = TextEditingController();
 
   @override
   void dispose() {
     voucherController.dispose();
+    notesController.dispose();
     super.dispose();
   }
 
@@ -50,7 +56,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildSectionTitle("Alamat Pengiriman"),
+            const SectionTitle("Alamat Pengiriman"),
             const SizedBox(height: 12),
             
             GestureDetector(
@@ -114,7 +120,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
             const SizedBox(height: 24),
 
-            _buildSectionTitle("Ringkasan Pesanan"),
+            const SectionTitle("Ringkasan Pesanan"),
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(16),
@@ -158,13 +164,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
             const SizedBox(height: 24),
 
-            _buildSectionTitle("Voucher Diskon"),
+            const SectionTitle("Voucher Diskon"),
             const SizedBox(height: 12),
             _buildVoucherSection(cartProvider),
 
             const SizedBox(height: 24),
 
-            _buildSectionTitle("Metode Pembayaran"),
+            const SectionTitle("Metode Pembayaran"),
             const SizedBox(height: 12),
             GestureDetector(
               onTap: () async {
@@ -206,6 +212,35 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 ),
               ),
             ),
+
+            const SizedBox(height: 24),
+            const SectionTitle("Catatan untuk Pesanan"),
+            const SizedBox(height: 12),
+            TextField(
+              controller: notesController,
+              minLines: 2,
+              maxLines: 4,
+              textCapitalization: TextCapitalization.sentences,
+              decoration: InputDecoration(
+                hintText: "Contoh: jangan pedas, saus dipisah...",
+                filled: true,
+                fillColor: AppColors.fieldFill,
+                contentPadding: const EdgeInsets.all(14),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppRadius.md),
+                  borderSide: BorderSide.none,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppRadius.md),
+                  borderSide: BorderSide.none,
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppRadius.md),
+                  borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+                ),
+              ),
+            ),
+
             const SizedBox(height: 40),
           ],
         ),
@@ -224,46 +259,29 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           ],
         ),
         child: SafeArea(
-          child: SizedBox(
-            width: double.infinity,
-            height: 54,
-            child: ElevatedButton(
-              onPressed: items.isEmpty ? null : () { 
-                // --- PERBAIKAN DI SINI ---
-                // 1. Simpan ke riwayat pesanan dulu
-                cartProvider.addOrder(totalHarga); 
+          child: PrimaryButton(
+            label: "Pesan Sekarang",
+            onPressed: items.isEmpty
+                ? null
+                : () {
+                    // 1. Simpan ke riwayat pesanan dulu
+                    cartProvider.addOrder(totalHarga, notes: notesController.text.trim());
 
-                // 2. Tampilkan snackbar keberhasilan
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text("Pesanan berhasil dibuat"),
-                    backgroundColor: Color(0xFF4CAF50),
-                    behavior: SnackBarBehavior.floating,
-                  ),
-                );
-                
-                // 3. Pindah ke Home setelah delay singkat
-                final navigator = Navigator.of(context);
-                Future.delayed(const Duration(seconds: 1), () {
-                  navigator.pushNamedAndRemoveUntil('/home', (route) => false);
-                });
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF4CAF50),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                elevation: 0,
-              ),
-              child: const Text(
-                "Pesan Sekarang",
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-            ),
+                    // 2. Tampilkan snackbar keberhasilan
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text("Pesanan berhasil dibuat"),
+                        backgroundColor: Color(0xFF4CAF50),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+
+                    // 3. Pindah ke Home setelah delay singkat
+                    final navigator = Navigator.of(context);
+                    Future.delayed(const Duration(seconds: 1), () {
+                      navigator.pushNamedAndRemoveUntil('/home', (route) => false);
+                    });
+                  },
           ),
         ),
       ),
@@ -342,17 +360,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildSectionTitle(String title) {
-    return Text(
-      title,
-      style: const TextStyle(
-        fontSize: 16,
-        fontWeight: FontWeight.bold,
-        color: Colors.black,
-      ),
     );
   }
 

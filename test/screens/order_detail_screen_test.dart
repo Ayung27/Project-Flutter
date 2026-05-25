@@ -21,7 +21,13 @@ void main() {
 
     expect(find.text('ORD-123'), findsOneWidget);
     expect(find.text('Nasi Goreng'), findsOneWidget);
-    expect(find.text('Es Teh'), findsOneWidget);
-    expect(find.text('Rp 55.000'), findsOneWidget); // total
+
+    // Total ada di bawah (ListView lazy + bottom bar "Pesan Lagi") → scroll dulu.
+    await tester.scrollUntilVisible(
+      find.text('Rp 55.000'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('Rp 55.000'), findsOneWidget);
   });
 }

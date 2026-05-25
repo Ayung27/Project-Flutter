@@ -2,9 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/cart_providers.dart';
 import '../utils/currency.dart';
+import '../widgets/app_card.dart';
+import '../widgets/empty_state.dart';
+import '../widgets/primary_button.dart';
+import '../widgets/quantity_selector.dart';
 
 class CartScreen extends StatelessWidget {
-  const CartScreen({super.key});
+  /// Dipanggil oleh CTA "Eksplor Menu" pada empty state (mis. pindah ke tab Home).
+  final VoidCallback? onExplore;
+
+  const CartScreen({super.key, this.onExplore});
 
   @override
   Widget build(BuildContext context) {
@@ -51,17 +58,12 @@ class CartScreen extends StatelessWidget {
   }
 
   Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.shopping_cart_outlined, size: 100, color: Colors.grey.shade300),
-          const SizedBox(height: 20),
-          const Text("Keranjang kosong 😢", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey)),
-          const SizedBox(height: 12),
-          const Text("Yuk, cari makanan favoritmu sekarang!", style: TextStyle(fontSize: 14, color: Colors.grey)),
-        ],
-      ),
+    return EmptyState(
+      icon: Icons.shopping_cart_outlined,
+      title: "Keranjang kosong 😢",
+      message: "Yuk, cari makanan favoritmu sekarang!",
+      actionLabel: onExplore != null ? "Eksplor Menu" : null,
+      onAction: onExplore,
     );
   }
 
@@ -90,18 +92,9 @@ class CartScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              height: 54,
-              child: ElevatedButton(
-                onPressed: () => Navigator.pushNamed(context, '/checkout'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF4CAF50),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  elevation: 0,
-                ),
-                child: const Text("Checkout", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
-              ),
+            PrimaryButton(
+              label: "Checkout",
+              onPressed: () => Navigator.pushNamed(context, '/checkout'),
             ),
           ],
         ),
@@ -130,17 +123,9 @@ class ModernCartItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final cartProvider = Provider.of<CartProvider>(context, listen: false);
 
-    return Container(
+    return AppCard(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(color: Colors.grey.withValues(alpha: 0.08), spreadRadius: 0, blurRadius: 10, offset: const Offset(0, 4)),
-        ],
-        border: Border.all(color: Colors.grey.shade100),
-      ),
       child: Row(
         children: [
           ClipRRect(
@@ -172,12 +157,11 @@ class ModernCartItem extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    _buildQtyBtn(Icons.remove, () => cartProvider.updateQuantity(index, false)),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text(qty.toString(), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    QuantitySelector(
+                      quantity: qty,
+                      onIncrement: () => cartProvider.updateQuantity(index, true),
+                      onDecrement: () => cartProvider.updateQuantity(index, false),
                     ),
-                    _buildQtyBtn(Icons.add, () => cartProvider.updateQuantity(index, true)),
                   ],
                 ),
               ],
@@ -188,19 +172,4 @@ class ModernCartItem extends StatelessWidget {
     );
   }
 
-  Widget _buildQtyBtn(IconData icon, VoidCallback onTap) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
-        padding: const EdgeInsets.all(4),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border.all(color: Colors.grey.shade300),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Icon(icon, size: 18, color: const Color(0xFF4CAF50)),
-      ),
-    );
-  }
 }

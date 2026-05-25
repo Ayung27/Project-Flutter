@@ -13,12 +13,16 @@ class Product {
   /// Apakah produk tersedia untuk dipesan (false = "Habis").
   final bool available;
 
+  /// Kategori menu (mis. "Makanan", "Minuman"). Kosong = tanpa kategori.
+  final String category;
+
   const Product({
     required this.name,
     required this.price,
     this.imageUrl = '',
     this.rating = 0,
     this.available = true,
+    this.category = '',
   });
 
   /// Membuat [Product] dari map menu lama yang memakai harga string
@@ -29,6 +33,7 @@ class Product {
       price: parseRupiah(map['harga']?.toString() ?? ''),
       imageUrl: (map['img'] ?? map['imageUrl'] ?? '').toString(),
       rating: double.tryParse(map['rating']?.toString() ?? '') ?? 0,
+      category: (map['kategori'] ?? map['category'] ?? '').toString(),
     );
   }
 
@@ -39,6 +44,7 @@ class Product {
         'imageUrl': imageUrl,
         'rating': rating,
         'available': available,
+        'category': category,
       };
 
   factory Product.fromJson(Map<String, dynamic> json) {
@@ -48,6 +54,7 @@ class Product {
       imageUrl: json['imageUrl'] as String? ?? '',
       rating: (json['rating'] as num?)?.toDouble() ?? 0,
       available: json['available'] as bool? ?? true,
+      category: json['category'] as String? ?? '',
     );
   }
 }

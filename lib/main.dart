@@ -5,6 +5,7 @@ import 'firebase_options.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:food_app/services/storage_service.dart';
+import 'package:food_app/theme/app_theme.dart';
 
 // Import Screens
 import 'package:food_app/screens/login_screen.dart';
@@ -22,6 +23,7 @@ import 'package:food_app/screens/order_history_screen.dart';
 // Import Providers
 import 'package:food_app/providers/cart_providers.dart';
 import 'package:food_app/providers/alamat_provider.dart';
+import 'package:food_app/providers/favorites_provider.dart';
 
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
@@ -41,6 +43,7 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => CartProvider(storage: storage)..load()),
         ChangeNotifierProvider(create: (_) => AlamatProvider(storage: storage)..load()),
+        ChangeNotifierProvider(create: (_) => FavoritesProvider(storage: storage)..load()),
       ],
       child: const MyApp(),
     ),
@@ -71,10 +74,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Food App',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF43A047)),
-        useMaterial3: true,
-      ),
+      theme: AppTheme.light,
       initialRoute: '/login',
       routes: {
         '/': (context) => LoginScreen(), // const dihapus
