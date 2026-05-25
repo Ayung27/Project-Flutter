@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "877593837023",
+    "project_id": "food-cdb6b",
+    "storage_bucket": "food-cdb6b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:877593837023:android:13bbd6717e781571b3586a",
+        "android_client_info": {
+          "package_name": "com.example.food_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "877593837023-cllk94cess5pn6rq4igofl79tnqfo6bk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.food_app",
+            "certificate_hash": "e29f57865f6aec85120a2a6439f510e129238aee"
+          }
+        },
+        {
+          "client_id": "877593837023-av3fvgvbali6j8tvlls51jsd9ltigka2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCkwRBMvbDYRTPDZBrbFIcf5Ld1SYXagX0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "877593837023-av3fvgvbali6j8tvlls51jsd9ltigka2.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "877593837023-eki4je63ntnbacd73iju7em1924ga13h.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.foodApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
